@@ -1,15 +1,20 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'servicios/servicio_autenticacion.dart';
-import 'pantallas/pantalla_inicio_sesion.dart';
-import 'pantallas/pantalla_dashboard.dart';
-import 'utilidades/estilos.dart';
+import 'package:proyectos_cliente/pantallas/pantalla_dashboard.dart';
+import 'package:proyectos_cliente/pantallas/pantalla_inicio_sesion.dart';
+import 'package:proyectos_cliente/servicios/servicio_autenticacion.dart';
+import 'package:proyectos_cliente/utilidades/estilos.dart';
+
+import 'firebase_options.dart';
 
 void main() {
-  runApp(const AplicacionProyectosEPIS());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const MyApp());
 }
 
-class AplicacionProyectosEPIS extends StatelessWidget {
-  const AplicacionProyectosEPIS({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -49,45 +54,54 @@ class AplicacionProyectosEPIS extends StatelessWidget {
           ),
         ),
       ),
-      home: const PantallaSplash(),
+      home: FutureBuilder(
+        future: Firebase.initializeApp(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const PantallaSplash(); // Show splash screen while waiting
+          }
+
+          if (snapshot.hasError) {
+            // Handle initialization error
+            return Scaffold(
+              body: Center(
+                child: Text('Error initializing Firebase: ${snapshot.error}'),
+              ),
+            );
+          }
+
+          // Firebase is initialized, proceed to authentication check
+          return const AuthWrapper();
+        },
+      ),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class PantallaSplash extends StatefulWidget {
-  const PantallaSplash({super.key});
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
 
   @override
-  State<PantallaSplash> createState() => _PantallaSplashState();
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const PantallaSplash(); // Or a loading indicator
+        }
+        if (snapshot.hasData) {
+          return const PantallaDashboard();
+        } else {
+          return const PantallaInicioSesion();
+        }
+      },
+    );
+  }
 }
 
-class _PantallaSplashState extends State<PantallaSplash> {
-  @override
-  void initState() {
-    super.initState();
-    _verificarSesion();
-  }
-
-  Future<void> _verificarSesion() async {
-    // Simular carga inicial
-    await Future.delayed(const Duration(seconds: 2));
-    
-    // Verificar si hay una sesion guardada
-    await ServicioAutenticacion.instancia.verificarSesionGuardada();
-    
-    if (mounted) {
-      final estaAutenticado = ServicioAutenticacion.instancia.estaAutenticado;
-      
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => estaAutenticado
-              ? const PantallaDashboard()
-              : const PantallaInicioSesion(),
-        ),
-      );
-    }
-  }
+class PantallaSplash extends StatelessWidget {
+  const PantallaSplash({super.key});
 
   @override
   Widget build(BuildContext context) {

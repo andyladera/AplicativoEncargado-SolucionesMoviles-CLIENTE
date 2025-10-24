@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+
 import '../modelos/concurso.dart';
 import '../servicios/servicio_autenticacion.dart';
 import '../servicios/servicio_concursos.dart';
@@ -25,12 +27,12 @@ class _PantallaEnviarProyectoState extends State<PantallaEnviarProyecto> {
   final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();
   final _githubController = TextEditingController();
-  
+
   String? _categoriaSeleccionada;
   bool _cargando = false;
 
   XFile? _archivoAval;
-  XFile? _archivoZip;
+  File? _archivoZip;
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -51,18 +53,31 @@ class _PantallaEnviarProyectoState extends State<PantallaEnviarProyecto> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error al seleccionar la imagen.'), backgroundColor: Colores.error),
+        const SnackBar(
+            content: Text('Error al seleccionar la imagen.'),
+            backgroundColor: Colores.error),
       );
     }
   }
 
-  void _seleccionarZip() {
-    setState(() {
-      _archivoZip = XFile('path/simulado/proyecto.zip');
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Simulación: Archivo ZIP seleccionado.')),
-    );
+  Future<void> _seleccionarZip() async {
+    try {
+      final resultado = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['zip'],
+      );
+      if (resultado != null) {
+        setState(() {
+          _archivoZip = File(resultado.files.single.path!);
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Error al seleccionar el archivo ZIP.'),
+            backgroundColor: Colores.error),
+      );
+    }
   }
 
   Future<void> _enviarFormulario() async {
@@ -92,7 +107,7 @@ class _PantallaEnviarProyectoState extends State<PantallaEnviarProyecto> {
       concursoId: widget.concurso.id,
       categoriaId: _categoriaSeleccionada!,
       enlaceGithub: _githubController.text,
-      archivoZip: _archivoZip!.name,
+      archivoZip: _archivoZip!.uri.pathSegments.last,
       archivoAval: _archivoAval!.name,
     );
 
@@ -166,7 +181,7 @@ class _PantallaEnviarProyectoState extends State<PantallaEnviarProyecto> {
             const SizedBox(height: 12),
             _buildSelectorArchivo(
               titulo: 'Proyecto (.zip)',
-              nombreArchivo: _archivoZip?.name,
+              nombreArchivo: _archivoZip?.uri.pathSegments.last,
               alPresionar: _seleccionarZip,
             ),
             const SizedBox(height: 32),

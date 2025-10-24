@@ -17,9 +17,9 @@ class Estudiante {
     required this.ciclo,
   });
 
-  factory Estudiante.desdeJson(Map<String, dynamic> json) {
+  factory Estudiante.desdeJson(Map<String, dynamic> json, {String? id}) {
     return Estudiante(
-      id: json['id'] ?? '',
+      id: id ?? json['id'] ?? '',
       nombres: json['nombres'] ?? '',
       apellidos: json['apellidos'] ?? '',
       codigoUniversitario: json['codigo_universitario'] ?? '',
@@ -31,7 +31,6 @@ class Estudiante {
 
   Map<String, dynamic> aJson() {
     return {
-      'id': id,
       'nombres': nombres,
       'apellidos': apellidos,
       'codigo_universitario': codigoUniversitario,
@@ -39,6 +38,26 @@ class Estudiante {
       'numero_telefonico': numeroTelefonico,
       'ciclo': ciclo,
     };
+  }
+
+  Estudiante copyWith({
+    String? id,
+    String? nombres,
+    String? apellidos,
+    String? codigoUniversitario,
+    String? correo,
+    String? numeroTelefonico,
+    int? ciclo,
+  }) {
+    return Estudiante(
+      id: id ?? this.id,
+      nombres: nombres ?? this.nombres,
+      apellidos: apellidos ?? this.apellidos,
+      codigoUniversitario: codigoUniversitario ?? this.codigoUniversitario,
+      correo: correo ?? this.correo,
+      numeroTelefonico: numeroTelefonico ?? this.numeroTelefonico,
+      ciclo: ciclo ?? this.ciclo,
+    );
   }
 
   String get nombreCompleto => '$nombres $apellidos';
