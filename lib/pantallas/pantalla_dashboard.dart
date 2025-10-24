@@ -184,19 +184,12 @@ class _PantallaDashboardState extends State<PantallaDashboard> {
             concurso.nombre,
             style: Estilos.subtitulo,
           ),
-          const SizedBox(height: 8),
-          Text(
-            concurso.descripcion,
-            style: Estilos.cuerpoSecundario,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildInfoFecha('Inicia', concurso.fechaInicio),
-              _buildInfoFecha('Finaliza', concurso.fechaFin),
+              _buildInfoFecha('Inicia', concurso.fechaCreacion),
+              _buildInfoFecha('Finaliza', concurso.fechaLimiteInscripcion),
             ],
           ),
           const SizedBox(height: 16),

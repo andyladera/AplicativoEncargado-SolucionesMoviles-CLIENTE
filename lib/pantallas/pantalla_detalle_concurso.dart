@@ -77,18 +77,6 @@ class PantallaDetalleConcurso extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  
-                  Text(
-                    'Descripcion',
-                    style: Estilos.subtitulo,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    concurso.descripcion,
-                    style: Estilos.cuerpo,
-                  ),
-                  const SizedBox(height: 16),
-                  
                   Row(
                     children: [
                       Expanded(
@@ -101,7 +89,7 @@ class PantallaDetalleConcurso extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${concurso.fechaInicio.day}/${concurso.fechaInicio.month}/${concurso.fechaInicio.year}',
+                              '${concurso.fechaCreacion.day}/${concurso.fechaCreacion.month}/${concurso.fechaCreacion.year}',
                               style: Estilos.cuerpo.copyWith(
                                 fontWeight: FontWeight.w500,
                               ),
@@ -119,7 +107,7 @@ class PantallaDetalleConcurso extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${concurso.fechaFin.day}/${concurso.fechaFin.month}/${concurso.fechaFin.year}',
+                              '${concurso.fechaLimiteInscripcion.day}/${concurso.fechaLimiteInscripcion.month}/${concurso.fechaLimiteInscripcion.year}',
                               style: Estilos.cuerpo.copyWith(
                                 fontWeight: FontWeight.w500,
                               ),
@@ -219,7 +207,7 @@ class PantallaDetalleConcurso extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              categoria.descripcion,
+              'Ciclos: ${categoria.rangoCiclos}',
               style: Estilos.cuerpoSecundario,
             ),
           ],

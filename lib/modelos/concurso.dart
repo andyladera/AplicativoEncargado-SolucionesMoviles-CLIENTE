@@ -1,86 +1,64 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Concurso {
   final String id;
   final String nombre;
-  final String descripcion;
-  final DateTime fechaInicio;
-  final DateTime fechaFin;
-  final bool activo;
+  final DateTime fechaCreacion;
+  final DateTime fechaLimiteInscripcion;
   final List<Categoria> categorias;
 
   Concurso({
     required this.id,
     required this.nombre,
-    required this.descripcion,
-    required this.fechaInicio,
-    required this.fechaFin,
-    required this.activo,
+    required this.fechaCreacion,
+    required this.fechaLimiteInscripcion,
     required this.categorias,
   });
 
-  factory Concurso.desdeJson(Map<String, dynamic> json) {
+  factory Concurso.desdeDocumento(String id, Map<String, dynamic> data) {
     return Concurso(
-      id: json['id'] ?? '',
-      nombre: json['nombre'] ?? '',
-      descripcion: json['descripcion'] ?? '',
-      fechaInicio: DateTime.parse(json['fecha_inicio'] ?? DateTime.now().toString()),
-      fechaFin: DateTime.parse(json['fecha_fin'] ?? DateTime.now().toString()),
-      activo: json['activo'] ?? false,
-      categorias: (json['categorias'] as List<dynamic>?)
-          ?.map((categoria) => Categoria.desdeJson(categoria))
-          .toList() ?? [],
+      id: id,
+      nombre: data['nombre'] ?? '',
+      fechaCreacion: (data['fechaCreacion'] as Timestamp).toDate(),
+      fechaLimiteInscripcion:
+          (data['fechaLimiteInscripcion'] as Timestamp).toDate(),
+      categorias: (data['categorias'] as List<dynamic>?)
+              ?.map((categoria) => Categoria.desdeJson(categoria))
+              .toList() ??
+          [],
     );
-  }
-
-  Map<String, dynamic> aJson() {
-    return {
-      'id': id,
-      'nombre': nombre,
-      'descripcion': descripcion,
-      'fecha_inicio': fechaInicio.toIso8601String(),
-      'fecha_fin': fechaFin.toIso8601String(),
-      'activo': activo,
-      'categorias': categorias.map((categoria) => categoria.aJson()).toList(),
-    };
   }
 
   bool get estaEnPeriodoDeInscripcion {
     final ahora = DateTime.now();
-    return ahora.isAfter(fechaInicio) && ahora.isBefore(fechaFin);
+    return ahora.isAfter(fechaCreacion) && ahora.isBefore(fechaLimiteInscripcion);
   }
 
   bool get estaVigente {
-    return activo;
+    return estaEnPeriodoDeInscripcion;
   }
 }
 
 class Categoria {
-  final String id;
   final String nombre;
-  final String descripcion;
-  final String concursoId;
+  final String rangoCiclos;
 
   Categoria({
-    required this.id,
     required this.nombre,
-    required this.descripcion,
-    required this.concursoId,
+    required this.rangoCiclos,
   });
 
   factory Categoria.desdeJson(Map<String, dynamic> json) {
     return Categoria(
-      id: json['id'] ?? '',
       nombre: json['nombre'] ?? '',
-      descripcion: json['descripcion'] ?? '',
-      concursoId: json['concurso_id'] ?? '',
+      rangoCiclos: json['rangoCiclos'] ?? '',
     );
   }
 
   Map<String, dynamic> aJson() {
     return {
-      'id': id,
       'nombre': nombre,
-      'descripcion': descripcion,
-      'concurso_id': concursoId,
+      'rangoCiclos': rangoCiclos,
     };
   }
 }

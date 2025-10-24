@@ -39,7 +39,7 @@ class _PantallaEnviarProyectoState extends State<PantallaEnviarProyecto> {
   void initState() {
     super.initState();
     if (widget.categoria != null) {
-      _categoriaSeleccionada = widget.categoria!.id;
+      _categoriaSeleccionada = widget.categoria!.nombre;
     }
   }
 
@@ -157,7 +157,7 @@ class _PantallaEnviarProyectoState extends State<PantallaEnviarProyecto> {
                 border: OutlineInputBorder(),
               ),
               items: widget.concurso.categorias.map((cat) {
-                return DropdownMenuItem(value: cat.id, child: Text(cat.nombre));
+                return DropdownMenuItem(value: cat.nombre, child: Text(cat.nombre));
               }).toList(),
               onChanged: (val) => setState(() => _categoriaSeleccionada = val),
               validator: (val) => val == null ? 'Selecciona una categoría' : null,

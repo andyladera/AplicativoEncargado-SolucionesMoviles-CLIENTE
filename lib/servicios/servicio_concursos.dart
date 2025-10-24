@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:proyectos_cliente/modelos/concurso.dart';
 import 'package:proyectos_cliente/modelos/proyecto.dart';
 
@@ -15,50 +16,15 @@ class ServicioConcursos {
   
   ServicioConcursos._();
 
-  // Lista interna de concursos para simulación
-  final List<Concurso> _concursos = [
-    Concurso(
-      id: '1',
-      nombre: 'Concurso de Innovacion Tecnologica 2024',
-      descripcion: 'Concurso para proyectos de innovacion en tecnologia',
-      fechaInicio: DateTime(2023, 5, 20),
-      fechaFin: DateTime(2024, 5, 20),
-      activo: true,
-      categorias: [
-        Categoria(id: '1', nombre: 'Desarrollo Web', descripcion: 'Proyectos de desarrollo web y aplicaciones', concursoId: '1'),
-        Categoria(id: '2', nombre: 'Aplicaciones Moviles', descripcion: 'Desarrollo de aplicaciones para dispositivos moviles', concursoId: '1'),
-        Categoria(id: '3', nombre: 'Inteligencia Artificial', descripcion: 'Proyectos que implementen IA o Machine Learning', concursoId: '1'),
-      ],
-    ),
-    Concurso(
-      id: '2',
-      nombre: 'Hackathon EPIS 2024',
-      descripcion: 'Hackathon de 48 horas para estudiantes de EPIS',
-      fechaInicio: DateTime.now().add(const Duration(days: 15)),
-      fechaFin: DateTime.now().add(const Duration(days: 17)),
-      activo: true,
-      categorias: [
-        Categoria(id: '4', nombre: 'Solucion Empresarial', descripcion: 'Soluciones tecnologicas para empresas', concursoId: '2'),
-        Categoria(id: '5', nombre: 'Impacto Social', descripcion: 'Proyectos con impacto social positivo', concursoId: '2'),
-      ],
-    ),
-     Concurso(
-      id: '3',
-      nombre: 'Concurso de Verano 2025',
-      descripcion: 'Concurso de proyectos para el ciclo de verano.',
-      fechaInicio: DateTime.now().subtract(const Duration(days: 10)),
-      fechaFin: DateTime.now().add(const Duration(days: 20)),
-      activo: true,
-      categorias: [
-        Categoria(id: '6', nombre: 'Videojuegos', descripcion: 'Desarrollo de videojuegos.', concursoId: '3'),
-      ],
-    ),
-  ];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<List<Concurso>> obtenerConcursosDisponibles() async {
     try {
-      await Future.delayed(const Duration(seconds: 1));
-      return _concursos;
+      final snapshot = await _firestore.collection('concursos').get();
+      final concursos = snapshot.docs.map((doc) {
+        return Concurso.desdeDocumento(doc.id, doc.data());
+      }).toList();
+      return concursos;
     } catch (e) {
       print('Error al obtener concursos: $e');
       return [];
@@ -137,13 +103,17 @@ class ServicioConcursos {
     required String archivoAval,
   }) async {
     try {
-      await Future.delayed(const Duration(seconds: 2));
-      
-      print('Proyecto enviado (simulación):');
-      print('  - Nombre: $nombreProyecto');
-      print('  - Aval: $archivoAval');
-      print('  - Zip: $archivoZip');
-
+      await _firestore.collection('proyectos').add({
+        'nombre': nombreProyecto,
+        'estudianteId': estudianteId,
+        'concursoId': concursoId,
+        'categoriaId': categoriaId,
+        'enlaceGithub': enlaceGithub,
+        'archivoZip': archivoZip,
+        'archivoAval': archivoAval,
+        'fechaEnvio': FieldValue.serverTimestamp(),
+        'estado': 'pendiente',
+      });
       return true;
     } catch (e) {
       print('Error al enviar proyecto: $e');
