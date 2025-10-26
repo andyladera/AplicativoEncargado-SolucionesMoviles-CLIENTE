@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:proyectos_cliente/modelos/concurso.dart';
-import 'package:proyectos_cliente/modelos/proyecto.dart';
-
-// Importa esta extensión para usar firstWhereOrNull de forma segura
 import 'package:collection/collection.dart';
+import '../modelos/concurso.dart';
+import '../modelos/proyecto.dart';
+import 'servicio_mysql.dart';
 
 class ServicioConcursos {
   static const String urlBase = 'https://api-ejemplo.com'; // Cambiar por la URL real
@@ -20,24 +19,38 @@ class ServicioConcursos {
 
   Future<List<Concurso>> obtenerConcursosDisponibles() async {
     try {
-      final snapshot = await _firestore.collection('concursos').get();
-      final concursos = snapshot.docs.map((doc) {
-        return Concurso.desdeDocumento(doc.id, doc.data());
-      }).toList();
-      return concursos;
+      // Usar MySQL en lugar de Firebase
+      return await ServicioMySQL.obtenerConcursosActivos();
     } catch (e) {
-      print('Error al obtener concursos: $e');
-      return [];
+      print('Error al obtener concursos desde MySQL: $e');
+      // Fallback a Firebase si MySQL falla
+      try {
+        final snapshot = await _firestore.collection('concursos').get();
+        final concursos = snapshot.docs.map((doc) {
+          return Concurso.desdeDocumento(doc.id, doc.data());
+        }).toList();
+        return concursos;
+      } catch (firebaseError) {
+        print('Error al obtener concursos desde Firebase: $firebaseError');
+        return [];
+      }
     }
   }
 
   Future<Concurso?> obtenerConcursoPorId(String id) async {
     try {
-      final concursos = await obtenerConcursosDisponibles();
-      return concursos.firstWhere((concurso) => concurso.id == id);
+      // Usar MySQL en lugar de Firebase
+      return await ServicioMySQL.obtenerConcursoPorId(int.parse(id));
     } catch (e) {
-      print('Error al obtener concurso por ID: $e');
-      return null;
+      print('Error al obtener concurso por ID desde MySQL: $e');
+      // Fallback a Firebase si MySQL falla
+      try {
+        final concursos = await obtenerConcursosDisponibles();
+        return concursos.firstWhere((concurso) => concurso.id == id);
+      } catch (firebaseError) {
+        print('Error al obtener concurso por ID desde Firebase: $firebaseError');
+        return null;
+      }
     }
   }
 
